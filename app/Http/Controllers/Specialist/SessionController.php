@@ -65,7 +65,7 @@ class SessionController extends Controller
     public function show(StudentSession $session)
     {
         // السماح بعرض الجلسة إذا كانت مخصصة للأخصائي الحالي أو بدون أخصائي
-        if ($session->specialist_id !== null && $session->specialist_id !== auth()->id()) {
+        if ($session->specialist_id != null && $session->specialist_id != auth()->id()) {
             abort(403);
         }
 
@@ -87,7 +87,7 @@ class SessionController extends Controller
     public function update(Request $request, StudentSession $session)
     {
         // السماح بتحديث الجلسة إذا كانت مخصصة للأخصائي الحالي أو بدون أخصائي
-        if ($session->specialist_id !== null && $session->specialist_id !== auth()->id()) {
+        if ($session->specialist_id != null && $session->specialist_id != auth()->id()) {
             return response()->json(['success' => false, 'message' => 'غير مصرح'], 403);
         }
 
@@ -130,14 +130,15 @@ class SessionController extends Controller
    
     public function complete(StudentSession $session)
     {
-        // السماح بإكمال الجلسة إذا كانت مخصصة للأخصائي الحالي أو بدون أخصائي
-        if ($session->specialist_id !== null && $session->specialist_id !== auth()->id()) {
-            return response()->json(['success' => false, 'message' => 'غير مصرح'], 403);
-        }
+        // السماح لأي أخصائي بإكمال الجلسة
+        $session->update([
+            'status' => 'completed',
+            'specialist_id' => $session->specialist_id ?? auth()->id()
+        ]);
 
         // تعيين الأخصائي الحالي إذا لم يكن محدداً
         $updateData = ['status' => 'completed'];
-        if ($session->specialist_id === null) {
+        if ($session->specialist_id == null) {
             $updateData['specialist_id'] = auth()->id();
         }
 
