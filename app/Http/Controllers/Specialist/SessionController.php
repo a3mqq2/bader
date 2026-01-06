@@ -64,8 +64,8 @@ class SessionController extends Controller
      */
     public function show(StudentSession $session)
     {
-        // تأكد أن الجلسة للأخصائي الحالي
-        if ($session->specialist_id !== auth()->id()) {
+        // السماح بعرض الجلسة إذا كانت مخصصة للأخصائي الحالي أو بدون أخصائي
+        if ($session->specialist_id !== null && $session->specialist_id !== auth()->id()) {
             abort(403);
         }
 
@@ -86,8 +86,8 @@ class SessionController extends Controller
      */
     public function update(Request $request, StudentSession $session)
     {
-        // تأكد أن الجلسة للأخصائي الحالي
-        if ($session->specialist_id !== auth()->id()) {
+        // السماح بتحديث الجلسة إذا كانت مخصصة للأخصائي الحالي أو بدون أخصائي
+        if ($session->specialist_id !== null && $session->specialist_id !== auth()->id()) {
             return response()->json(['success' => false, 'message' => 'غير مصرح'], 403);
         }
 
@@ -104,7 +104,7 @@ class SessionController extends Controller
         }
 
         // تغيير الحالة لمكتملة أو غائب فقط إذا كانت مجدولة
-        $wasScheduled = $session->status === 'scheduled';
+        $wasScheduled = $session->status == 'scheduled';
         if (in_array($request->status, ['completed', 'absent']) && $wasScheduled) {
             $data['status'] = $request->status;
         }
@@ -112,7 +112,7 @@ class SessionController extends Controller
         $session->update($data);
 
         // إضافة حافز للأخصائي عند إكمال الجلسة
-        if ($request->status === 'completed' && $wasScheduled) {
+        if ($request->status == 'completed' && $wasScheduled) {
             $sessionType = $session->package->therapySession->name ?? 'جلسة';
             $this->addSessionIncentive(auth()->user(), "{$sessionType} - " . ($session->student->name ?? 'غير معروف'));
         }
@@ -130,11 +130,18 @@ class SessionController extends Controller
    
     public function complete(StudentSession $session)
     {
-        if ($session->specialist_id !== auth()->id()) {
+        // السماح بإكمال الجلسة إذا كانت مخصصة للأخصائي الحالي أو بدون أخصائي
+        if ($session->specialist_id !== null && $session->specialist_id !== auth()->id()) {
             return response()->json(['success' => false, 'message' => 'غير مصرح'], 403);
         }
 
-        $session->update(['status' => 'completed']);
+        // تعيين الأخصائي الحالي إذا لم يكن محدداً
+        $updateData = ['status' => 'completed'];
+        if ($session->specialist_id === null) {
+            $updateData['specialist_id'] = auth()->id();
+        }
+
+        $session->update($updateData);
 
         $studentName = $session->student->name ?? 'غير معروف';
         $sessionType = $session->package->therapySession->name ?? 'جلسة';
