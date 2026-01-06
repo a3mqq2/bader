@@ -80,8 +80,9 @@ class DuesController extends Controller
      */
     public function show(Student $student)
     {
+        // جلب جميع الفواتير (المسددة وغير المسددة)
         $student->load(['invoices' => function ($q) {
-            $q->whereIn('status', ['pending', 'partial'])->with('payments');
+            $q->with('payments')->latest();
         }]);
 
         // الخزائن المخولة للمستخدم الحالي
@@ -95,7 +96,8 @@ class DuesController extends Controller
             $treasuries = Treasury::active()->get();
         }
 
-        $totalDues = $student->invoices->sum('balance');
+        // حساب المستحقات (الفواتير غير المسددة فقط)
+        $totalDues = $student->invoices->whereIn('status', ['pending', 'partial'])->sum('balance');
 
         return view('accountant.dues.show', compact('student', 'treasuries', 'totalDues'));
     }

@@ -37,7 +37,7 @@
                 <div class="text-center">
                     <p class="mb-1 text-muted">إجمالي المستحقات</p>
                     <h2 class="mb-0 text-danger">{{ number_format($totalDues, 2) }} <small class="fs-5">د.ل</small></h2>
-                    <small class="text-muted">{{ $student->invoices->count() }} فاتورة مستحقة</small>
+                    <small class="text-muted">{{ $student->invoices->whereIn('status', ['pending', 'partial'])->count() }} فاتورة مستحقة</small>
                 </div>
             </div>
         </div>
@@ -49,7 +49,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
                     <i class="ti ti-file-invoice me-2"></i>
-                    الفواتير المستحقة
+                    جميع الفواتير
                 </h6>
                 <a href="{{ route('accountant.dues.index') }}" class="btn btn-outline-secondary btn-sm">
                     <i class="ti ti-arrow-right me-1"></i> رجوع
@@ -88,10 +88,14 @@
                                         <span class="badge bg-{{ $invoice->status_color }}">{{ $invoice->status_text }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-success btn-sm"
-                                            onclick="openPaymentModal({{ $invoice->id }}, '{{ $invoice->invoice_number }}', {{ $invoice->balance }})">
-                                            <i class="ti ti-cash me-1"></i> تحصيل
-                                        </button>
+                                        @if($invoice->status !== 'paid')
+                                            <button type="button" class="btn btn-success btn-sm"
+                                                onclick="openPaymentModal({{ $invoice->id }}, '{{ $invoice->invoice_number }}', {{ $invoice->balance }})">
+                                                <i class="ti ti-cash me-1"></i> تحصيل
+                                            </button>
+                                        @else
+                                            <span class="badge bg-success"><i class="ti ti-check me-1"></i>مسددة</span>
+                                        @endif
                                     </td>
                                 </tr>
                                 @if($invoice->payments->count() > 0)
@@ -124,8 +128,8 @@
                             @empty
                                 <tr>
                                     <td colspan="7" class="text-center py-5 text-muted">
-                                        <i class="ti ti-check-circle fs-1 d-block mb-2 text-success"></i>
-                                        لا توجد فواتير مستحقة
+                                        <i class="ti ti-file-off fs-1 d-block mb-2"></i>
+                                        لا توجد فواتير
                                     </td>
                                 </tr>
                             @endforelse

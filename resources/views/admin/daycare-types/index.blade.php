@@ -23,7 +23,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label"><i class="fas fa-money-bill me-1"></i> السعر الشهري (د.ل) <span class="text-danger">*</span></label>
+                        <label class="form-label"><i class="fas fa-money-bill me-1"></i> السعر لثلاثة اشهر (د.ل) <span class="text-danger">*</span></label>
                         <input type="number" name="price" id="typePrice" class="form-control" placeholder="0.00" step="0.01" min="0" required>
                     </div>
 

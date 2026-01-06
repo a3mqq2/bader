@@ -442,17 +442,19 @@ data-pc-theme="light"
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    flatpickr.localize(flatpickr.l10ns.ar);
     flatpickr(
       'input[type="date"], input.datepicker',
       {
-        dateFormat: "Y-m-d",   // what gets submitted
+        dateFormat: "Y-m-d",
         altInput: true,
-        altFormat: "F j, Y",    // what the user sees
-        allowInput: true
+        altFormat: "j F Y",
+        allowInput: true,
+        locale: "ar"
       }
     );
   });
