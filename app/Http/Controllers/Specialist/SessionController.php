@@ -86,10 +86,6 @@ class SessionController extends Controller
      */
     public function update(Request $request, StudentSession $session)
     {
-        // السماح بتحديث الجلسة إذا كانت مخصصة للأخصائي الحالي أو بدون أخصائي
-        if ($session->specialist_id != null && $session->specialist_id != auth()->id()) {
-            return response()->json(['success' => false, 'message' => 'غير مصرح'], 403);
-        }
 
         $request->validate([
             'notes' => 'nullable|string',
