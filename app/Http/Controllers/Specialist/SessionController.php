@@ -133,16 +133,8 @@ class SessionController extends Controller
         // السماح لأي أخصائي بإكمال الجلسة
         $session->update([
             'status' => 'completed',
-            'specialist_id' => $session->specialist_id ?? auth()->id()
+            'specialist_id' => $session->specialist_id ?: auth()->id()
         ]);
-
-        // تعيين الأخصائي الحالي إذا لم يكن محدداً
-        $updateData = ['status' => 'completed'];
-        if ($session->specialist_id == null) {
-            $updateData['specialist_id'] = auth()->id();
-        }
-
-        $session->update($updateData);
 
         $studentName = $session->student->name ?? 'غير معروف';
         $sessionType = $session->package->therapySession->name ?? 'جلسة';
